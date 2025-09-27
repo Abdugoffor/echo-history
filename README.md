@@ -1,6 +1,6 @@
 #Yuklash
 ```
-go get github.com/Abdugoffor/echo-history
+go get github.com/Abdugoffor/echo-history/history
 ```
 #Doc
 ```
@@ -50,4 +50,5 @@ func main() {
 }
 
 ```
+
 
