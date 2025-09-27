@@ -1,3 +1,8 @@
+#Yuklash
+```
+go get github.com/Abdugoffor/echo-history
+```
+#Doc
 ```
 package main
 
@@ -45,3 +50,4 @@ func main() {
 }
 
 ```
+
