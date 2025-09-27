@@ -2,6 +2,8 @@ package history
 
 import (
 	"encoding/json"
+	"fmt"
+	"reflect"
 
 	"gorm.io/gorm"
 )
@@ -14,43 +16,60 @@ func NewLogger(db *gorm.DB) *Logger {
 	return &Logger{DB: db}
 }
 
-func (l *Logger) writeLog(tx *gorm.DB, action string, model interface{}, old interface{}) error {
+func (l *Logger) writeLog(tx *gorm.DB, action string, newModel interface{}, oldModel interface{}) error {
 	table := tx.Statement.Table
-	var modelID *int64
-
-	// primary key olish
-	if pk := tx.Statement.Schema.PrioritizedPrimaryField; pk != nil {
-		if v, ok := pk.ValueOf(tx.Statement.Context, model); ok {
-			if id, ok := v.(int64); ok {
-				modelID = &id
-			}
-		}
-	}
+	modelID := getPrimaryKey(newModel)
 
 	var oldJSON, newJSON []byte
 	var err error
 
-	if old != nil {
-		oldJSON, err = json.Marshal(old)
+	if oldModel != nil {
+		oldJSON, err = json.Marshal(oldModel)
 		if err != nil {
 			return err
 		}
 	}
 
-	if model != nil {
-		newJSON, err = json.Marshal(model)
+	if newModel != nil {
+		newJSON, err = json.Marshal(newModel)
 		if err != nil {
 			return err
 		}
 	}
 
+	act := action
 	h := History{
-		Table:   &table,
-		ModelID: modelID,
-		Action:  &action,
+		Table:    &table,
+		ModelID:  modelID,
+		Action:   &act,
 		OldValue: oldJSON,
 		NewValue: newJSON,
 	}
 
 	return tx.Create(&h).Error
+}
+
+// primary key olish
+func getPrimaryKey(model interface{}) *int64 {
+	if model == nil {
+		return nil
+	}
+
+	v := reflect.ValueOf(model)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	field := v.FieldByName("ID")
+	if !field.IsValid() {
+		return nil
+	}
+
+	switch field.Kind() {
+	case reflect.Int, reflect.Int64, reflect.Int32:
+		id := field.Int()
+		return &id
+	default:
+		return nil
+	}
 }

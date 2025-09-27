@@ -14,7 +14,8 @@ func RequestContext(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		c.Set("ip", ip)
 
-		// auth middleware qo‘shilgach shu yerga c.Set("user_id", int64(1)) yoziladi
+		// auth middleware’dan keyin:
+		// c.Set("user_id", int64(1))
 
 		return next(c)
 	}
