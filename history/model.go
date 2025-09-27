@@ -3,22 +3,25 @@ package history
 import (
 	"time"
 
-	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
+// History model
 type History struct {
-	ID        int64          `json:"id" gorm:"primaryKey;autoIncrement"`
-	UserID    *int64         `json:"user_id" gorm:"index"`
-	Table     *string        `json:"table" gorm:"size:255;index"`
-	ModelID   *int64         `json:"model_id" gorm:"index"`
-	IPAddress *string        `json:"ip_address" gorm:"size:50"`
-	API       *string        `json:"api" gorm:"size:255"`
-	OldValue  datatypes.JSON `json:"old_value" gorm:"type:jsonb"`
-	NewValue  datatypes.JSON `json:"new_value" gorm:"type:jsonb"`
-	Action    *string        `json:"action" gorm:"size:50"`
-	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
+	ID        uint           `json:"id" gorm:"primaryKey;autoIncrement"`
+	UserID    *int64         `json:"user_id"`             // kim bajardi
+	Table     *string        `json:"table"`               // qaysi jadval
+	RowID     *string        `json:"row_id"`              // model PK
+	Action    *string        `json:"action"`              // create/update/delete/restore
+	OldValue  *string        `json:"old_value"`           // eski qiymatlar (JSON)
+	NewValue  *string        `json:"new_value"`           // yangi qiymatlar (JSON)
+	IP        *string        `json:"ip"`                  // foydalanuvchi IP
+	API       *string        `json:"api"`                 // endpoint
+	CreatedAt time.Time      `json:"created_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 }
 
+// Table nomi
 func (History) TableName() string {
-	return "history"
+	return "histories"
 }

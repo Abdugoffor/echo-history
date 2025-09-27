@@ -1,37 +1,22 @@
 package history
 
 import (
-	"net"
-
 	"github.com/labstack/echo/v4"
 )
 
+// RequestContext middleware
+// Har bir request’da context’ga user_id, ip va api path yoziladi
 func RequestContext(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		// Masalan JWT’dan user_id olish mumkin, hozircha 1 deb qoldiramiz
+		c.Set("user_id", int64(1))
+
 		ip := c.RealIP()
-		if ip == "" {
-			ip = getLocalIP()
-		}
 		c.Set("ip", ip)
 
-		// auth middleware’dan keyin:
-		// c.Set("user_id", int64(1))
+		api := c.Request().URL.Path
+		c.Set("api", api)
 
 		return next(c)
 	}
-}
-
-func getLocalIP() string {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "unknown"
-	}
-	for _, addr := range addrs {
-		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String()
-			}
-		}
-	}
-	return "unknown"
 }
